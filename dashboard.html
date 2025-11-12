@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Transcripto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Note: Background image paths are often relative to the CSS/HTML file or base URL */
+            background-image: url('./images/background.png'); 
+            background-size: cover;
+            background-position: bottom;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            z-index: 0;
+        }
+
+        /* Page fade-in animation */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+
+        /* Toast animation */
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-toast-in { animation: toast-in 0.3s ease-out; }
+        
+    </style>
+</head>
+<body class="text-gray-300" style="position: relative; z-index: 1;">
+
+    <div id="toaster-container" class="fixed bottom-4 right-4 z-[100] space-y-2">
+    </div>
+
+    <div class="flex min-h-screen">
+        
+        <aside class="w-64 h-screen fixed z-30 bg-slate-900/80 text-slate-200 flex flex-col shadow-lg border-r border-slate-800/50 backdrop-blur-sm">
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-lg flex items-center justify-center shadow-lg shadow-violet-500/30">
+                        <svg class="w-6 h-6 text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" x2="12" y1="19" y2="22"></line>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-semibold">Transcripto</h1>
+                </div>
+                
+                <nav id="sidebar-nav" class="space-y-1">
+                    <button onclick="hidethehell('block')" data-page="dashboard" class="nav-button w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/40">
+                        <svg class="w-5 h-5 drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                        </svg>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="hidethehell('block')" data-page="my-notes" class="nav-button w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-slate-300/70 hover:bg-slate-800 hover:text-slate-100 light:text-slate-500 light:hover:bg-sky-100 light:hover:text-sky-900">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-7-5Z"></path><path d="M15 3v4a1 1 0 0 0 1 1h4"></path>
+                        </svg>
+                        <span>My Notes</span>
+                    </button>
+                    <button onclick="hidethehell('block')" data-page="shared-notes" class="nav-button w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-slate-300/70 hover:bg-slate-800 hover:text-slate-100 light:text-slate-500 light:hover:bg-sky-100 light:hover:text-sky-900">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
+                        </svg>
+                        <span>Shared Notes</span>
+                    </button>
+                    <button onclick="hidethehell('block')" data-page="templates" class="nav-button w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-slate-300/70 hover:bg-slate-800 hover:text-slate-100 light:text-slate-500 light:hover:bg-sky-100 light:hover:text-sky-900">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-8.58 3.9a2 2 0 0 1-1.66 0L3.17 17.65a1 1 0 0 1 0-1.83l8.58-3.91a2 2 0 0 1 1.66 0l8.58 3.91a1 1 0 0 1 0 1.83Z"></path><path d="m22 12.65-8.58 3.9a2 2 0 0 1-1.66 0L3.17 12.65a1 1 0 0 1 0-1.83L11.75 7a2 2 0 0 1 1.66 0l8.58 3.91a1 1 0 0 1 0 1.83Z"></path>
+                        </svg>
+                        <span>Templates</span>
+                    </button>
+                    <button onclick="hidethehell('none')" data-page="settings" class="nav-button w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-slate-300/70 hover:bg-slate-800 hover:text-slate-100 light:text-slate-500 light:hover:bg-sky-100 light:hover:text-sky-900">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 .54 1.73v.18a2 2 0 0 1-1.73 1l-.25.43a2 2 0 0 1 0 2l.08.15a2 2 0 0 0 .73 2.73l.38.22a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73v.18a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-.54-1.73v-.18a2 2 0 0 1 1.73-1l.25-.43a2 2 0 0 1 0-2l-.08-.15a2 2 0 0 0-.73-2.73l-.38-.22a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span>Settings</span>
+                    </button>
+                    <button onclick="hidethehell('none')" data-page="help" class="nav-button w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-slate-300/70 hover:bg-slate-800 hover:text-slate-100 light:text-slate-500 light:hover:bg-sky-100 light:hover:text-sky-900">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path>
+                        </svg>
+                        <span>Help & Support</span>
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="p-6 border-t border-slate-800 light:border-sky-200">
+                <div class="relative" id="dropdown-container">
+                    <button id="dropdown-trigger" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 light:hover:bg-sky-100 transition-all">
+                        <div id="sidebar-initials" class="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-lg shadow-violet-500/30">
+                            U
+                        </div>
+                        <div class="flex-1 text-left">
+                            <div id="sidebar-name" class="font-medium text-sm">User</div>
+                            <div class="text-xs text-slate-400 light:text-sky-600">View Profile</div>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-400 light:text-sky-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"></path>
+                        </svg>
+                    </button>
+                    
+                    <div id="dropdown-menu" class="hidden absolute z-50 mb-2 w-56 bottom-full right-0 rounded-md shadow-lg bg-slate-800 border border-slate-700 p-1 light:bg-white light:border-sky-200">
+                        <button id="dropdown-profile-btn" class="w-full text-left flex items-center px-3 py-2 text-sm rounded-md text-slate-200 hover:bg-slate-700 light:text-slate-700 light:hover:bg-sky-100">
+                            <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            My Profile
+                        </button>
+                        <button id="logout-btn" class="w-full text-left flex items-center px-3 py-2 text-sm rounded-md text-slate-200 hover:bg-slate-700 light:text-slate-700 light:hover:bg-sky-100">
+                            <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+                            </svg>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col relative ml-64"> <div class="flex-1 p-4 unique md:p-8 overflow-auto">
+                
+                <div id="page-dashboard" class="page-content animate-fade-in">
+                    <div class="flex flex-col items-center justify-start min-h-full pt-20 md:pt-32">
+                        <div class="w-full max-w-2xl mb-12 px-4">
+                            <div class="relative">
+                                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 light:text-sky-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+                                </svg>
+                                <input
+                                    type="search"
+                                    placeholder="Search your notes..."
+                                    id="dashboard-search"
+                                    class="w-full h-14 pl-12 pr-4 text-lg bg-slate-800/80 backdrop-blur-sm border-slate-700/50 rounded-full shadow-lg hover:shadow-xl focus:shadow-xl transition-all light:bg-white light:border-sky-300 light:text-sky-900 light:placeholder-sky-400"
+                                />
+                            </div>
+                        </div>
+                
+                        <div class="w-full max-w-5xl px-4 mb-12">
+                            <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
+                                <button
+                                    id="add-note-btn"
+                                    class="group flex items-center gap-4 px-8 py-6 rounded-3xl bg-gradient-to-br from-violet-600/20 to-fuchsia-500/20 backdrop-blur-sm hover:from-violet-600/30 hover:to-fuchsia-500/30 border-2 border-violet-600/50 hover:border-violet-500 shadow-lg shadow-violet-500/20 hover:shadow-xl hover:shadow-violet-500/40 transition-all light:from-violet-600/10 light:to-fuchsia-500/10 light:shadow-violet-500/10 light:hover:shadow-violet-500/20"
+                                >
+                                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                                        <svg class="w-8 h-8 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 5v14"></path><path d="M5 12h14"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-xl font-bold text-slate-100 light:text-sky-900">Add Note</span>
+                                </button>
+                                
+                                <button
+                                    id="ai-chat-btn"
+                                    class="group flex items-center gap-4 px-8 py-6 rounded-3xl bg-gradient-to-br from-fuchsia-500/20 to-slate-700/20 backdrop-blur-sm hover:from-fuchsia-500/30 hover:to-slate-700/30 border-2 border-fuchsia-500/50 hover:border-fuchsia-500 shadow-lg shadow-fuchsia-500/20 hover:shadow-xl hover:shadow-fuchsia-500/40 transition-all light:from-fuchsia-500/10 light:to-slate-400/10 light:shadow-fuchsia-500/10 light:hover:shadow-fuchsia-500/20 light:border-fuchsia-500/30"
+                                >
+                                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-slate-700 flex items-center justify-center shadow-lg shadow-fuchsia-500/30 light:from-fuchsia-500 light:to-slate-500">
+                                        <svg class="w-8 h-8 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 16.5c-2.3 0-4.18-1.7-4.45-3.92h-1.1c-.27 2.22-2.15 3.92-4.45 3.92-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5c2.3 0 4.18 1.7 4.45 3.92h1.1c.27-2.22 2.15-3.92 4.45-3.92 2.48 0 4.5 2.02 4.5 4.5s-2.02 4.5-4.5 4.5z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-xl font-bold text-slate-100 light:text-sky-900">AI Chat</span>
+                                </button>
+                            </div>
+                        </div>
+                
+                        <div class="w-full max-w-4xl px-4 space-y-4">
+                            <h2 class="text-lg font-semibold text-slate-300/80 px-2 light:text-sky-700">Recent</h2>
+                            <div id="recent-notes-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                </div>
+                        </div>
+                
+                        <div class="mt-12 flex justify-center gap-8 text-sm text-slate-400 light:text-sky-600">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-violet-400 drop-shadow-[0_0_5px_rgba(192,132,252,0.5)] light:text-violet-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-7-5Z"></path><path d="M15 3v4a1 1 0 0 0 1 1h4"></path>
+                                </svg>
+                                <span id="stats-notes-this-week">... notes this week</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span>... GB / 100 GB used</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-new-transcription" class="page-content hidden animate-fade-in">
+                    <div class="max-w-3xl mx-auto space-y-6">
+                        <h2 class="text-3xl font-bold light:text-sky-900">New Transcription</h2>
+                        
+                        <div class="rounded-lg border border-slate-700 bg-slate-800/60 text-slate-100 shadow-sm backdrop-blur-sm p-8 shadow-lg light:bg-white light:border-sky-200 light:text-sky-900">
+                            
+                            <div class="mb-6 space-y-2">
+                                <label for="template-select" class="text-sm font-medium leading-none text-slate-200 light:text-sky-800">Select Note Template (Optional)</label>
+                                <select id="template-select" class="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 light:bg-white light:border-sky-300 light:text-sky-900">
+                                    <option value="">Default (General Notes)</option>
+                                    <option value="Meeting Minutes">Meeting Minutes</option>
+                                    <option value="Interview Notes">Interview Notes</option>
+                                    <option value="Client Call">Client Call</option>
+                                    <option value="Sales Pitch">Sales Pitch</option>
+                                    <option value="Stand-up Meeting">Stand-up Meeting</option>
+                                    <option value="Lecture Summary">Lecture Summary</option>
+                                    <option value="Daily Journal">Daily Journal</option>
+                                    <option value="Book Review">Book Review</option>
+                                    <option value="Language Practice">Language Practice</option>
+                                    <option value="Therapy Session">Therapy Session</option>
+                                    <option value="Legal Deposition">Legal Deposition</option>
+                                    <option value="Medical Consultation">Medical Consultation</option>
+                                    <option value="Podcast Episode">Podcast Episode</option>
+                                    <option value="Brainstorming Session">Brainstorming Session</option>
+                                    <option value="Creative Writing">Creative Writing</option>
+                                </select>
+                            </div>
+
+                            <div
+                                id="drop-zone"
+                                class="border-2 border-dashed rounded-xl p-12 text-center transition-all cursor-pointer border-slate-600 hover:border-violet-500 hover:bg-slate-800/50 light:border-sky-300 light:hover:border-violet-500 light:hover:bg-sky-50"
+                            >
+                                <svg class="w-16 h-16 mx-auto mb-4 text-violet-400 drop-shadow-[0_0_10px_rgba(192,132,252,0.5)] light:text-violet-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line>
+                                </svg>
+                                <h3 class="text-xl font-semibold mb-2">Drag & drop your audio file here</h3>
+                                <p class="text-slate-400 mb-1 light:text-sky-600">or click to select a file</p>
+                                <p class="text-sm text-slate-400 light:text-sky-600">Supported formats: MP3, WAV, M4A, FLAC</p>
+                            </div>
+                            
+                            <input id="file-upload" type="file" accept="audio/*" class="hidden" />
+                            
+                            <div class="relative my-8">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-slate-700 light:border-sky-200"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-4 bg-slate-800 text-slate-400 light:bg-white light:text-sky-600">OR</span>
+                                </div>
+                            </div>
+                            
+                            <button
+                                id="start-recording-btn"
+                                class="w-full py-6 text-lg shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/50 transition-all inline-flex items-center justify-center rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-slate-900 bg-violet-600 text-white hover:bg-violet-500 light:focus:ring-offset-sky-50"
+                            >
+                                <svg class="w-6 h-6 mr-2 drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line>
+                                </svg>
+                                Start Live Recording
+                            </button>
+                            
+                            <p id="upload-status" class="mt-4 text-center text-violet-400 font-medium light:text-violet-600"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-my-notes" class="page-content hidden animate-fade-in">
+                    <div class="space-y-6">
+                        <h2 class="text-3xl font-bold light:text-sky-900">My Notes</h2>
+                        
+                        <div class="rounded-lg border border-slate-700 bg-slate-800/60 shadow-sm backdrop-blur-sm shadow-lg overflow-hidden light:bg-white light:border-sky-200">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-slate-800/50 border-b border-slate-700 light:bg-sky-100 light:border-sky-200">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider light:text-sky-700">Notes</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider light:text-sky-700">Date Modified</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider light:text-sky-700">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="notes-table-body" class="divide-y divide-slate-700 light:divide-sky-200">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-shared-notes" class="page-content hidden animate-fade-in">
+                    <div class="space-y-6">
+                        <h2 class="text-3xl font-bold light:text-sky-900">Shared With Me</h2>
+                        <div class="rounded-lg border border-slate-700 bg-slate-800/60 text-slate-100 shadow-sm backdrop-blur-sm p-12 text-center shadow-md light:bg-white light:border-sky-200">
+                            <p class="text-slate-400 text-lg light:text-sky-600">
+                                No notes have been shared with you yet.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-templates" class="page-content hidden animate-fade-in">
+                    <div class="space-y-8">
+                        <h2 class="text-3xl font-bold light:text-sky-900">Templates</h2>
+                        
+                        <div class="space-y-4">
+                            <h3 class="text-xl font-semibold text-violet-400 light:text-violet-600">Work & Business</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                <div data-template-id="meeting-minutes" data-template-name="Meeting Minutes" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            📝
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Meeting Minutes
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Structure your meeting notes with agenda, attendees, and action items.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="interview-notes" data-template-name="Interview Notes" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            🎤
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Interview Notes
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Capture interview responses with questions and key insights.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="client-call" data-template-name="Client Call" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            📞
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Client Call
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Track client conversations with requirements and next steps.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="sales-pitch" data-template-name="Sales Pitch" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            💼
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Sales Pitch
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Outline sales conversations with objections and closing notes.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="stand-up-meeting" data-template-name="Stand-up Meeting" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            🚀
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Stand-up Meeting
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Quick daily check-ins with team updates and blockers.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-xl font-semibold text-violet-400 light:text-violet-600">Personal & Learning</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                <div data-template-id="lecture-summary" data-template-name="Lecture Summary" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            🎓
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Lecture Summary
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Organize lecture content with topics, key points, and takeaways.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="daily-journal" data-template-name="Daily Journal" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            📔
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Daily Journal
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Personal reflection template with mood tracking and highlights.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div
+                                 <div data-template-id="book-review" data-template-name="Book Review" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            📚
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Book Review
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Record audiobook notes with chapter summaries.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="language-practice" data-template-name="Language Practice" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            🌍
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Language Practice
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Track language learning sessions and pronunciation.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-xl font-semibold text-violet-400 light:text-violet-600">Professional Services</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                <div data-template-id="therapy-session" data-template-name="Therapy Session" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            🧘
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Therapy Session
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Private notes for personal therapy and counseling.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="legal-deposition" data-template-name="Legal Deposition" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            ⚖️
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Legal Deposition
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Structure legal testimonies with timestamps and evidence.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="medical-consultation" data-template-name="Medical Consultation" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            🏥
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Medical Consultation
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Track medical appointments and health discussions.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-xl font-semibold text-violet-400 light:text-violet-600">Creative & Development</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                <div data-template-id="podcast-episode" data-template-name="Podcast Episode" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            🎙️
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Podcast Episode
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Document podcast content with timestamps and main topics.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="brainstorming-session" data-template-name="Brainstorming Session" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            💡
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Brainstorming
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Capture creative ideas and collaborative discussions.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-template-id="creative-writing" data-template-name="Creative Writing" class="p-6 hover:shadow-lg hover:shadow-violet-500/30 transition-all cursor-pointer border-slate-700/50 hover:border-violet-500/50 group rounded-lg border bg-slate-800/60 shadow-sm backdrop-blur-sm light:bg-white light:border-sky-200 light:hover:border-violet-400 light:hover:shadow-violet-500/10">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="w-14 h-14 rounded-xl bg-violet-600/20 flex items-center justify-center text-3xl shadow-md shadow-violet-500/10 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all light:bg-violet-600/10">
+                                            ✍️
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-slate-100 group-hover:text-violet-400 transition-colors mb-1 light:text-sky-900 light:group-hover:text-violet-600">
+                                                Creative Writing
+                                            </h3>
+                                            <p class="text-sm text-slate-400 leading-snug light:text-sky-600">
+                                                Capture story ideas and narrative development.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="page-settings" class="page-content ml-8 mt-8 hidden animate-fade-in">
+                    <div class="space-y-6 flex flex-col justify-start">
+                        <h2 class="text-3xl font-bold light:text-sky-900">Settings</h2>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                            <div class="lg:col-span-1 p-4 shadow-md rounded-lg border border-slate-700 bg-slate-800/60 backdrop-blur-sm h-fit light:bg-white light:border-sky-200">
+                                <nav id="settings-nav" class="space-y-1">
+                                    <button data-tab="profile" class="settings-tab-btn w-full text-left px-4 py-3 rounded-lg font-medium transition-all bg-violet-600/10 text-violet-400 shadow-md shadow-violet-500/10 light:bg-violet-600/10 light:text-violet-600">
+                                        My Profile
+                                    </button>
+                                    <button data-tab="password" class="settings-tab-btn w-full text-left px-4 py-3 rounded-lg font-medium transition-all text-slate-400 hover:bg-slate-700 hover:text-slate-100 light:text-sky-600 light:hover:bg-sky-100 light:hover:text-sky-900">
+                                        Password
+                                    </button>
+                                    <button data-tab="notifications" class="settings-tab-btn w-full text-left px-4 py-3 rounded-lg font-medium transition-all text-slate-400 hover:bg-slate-700 hover:text-slate-100 light:text-sky-600 light:hover:bg-sky-100 light:hover:text-sky-900">
+                                        Notifications
+                                    </button>
+                                </nav>
+                            </div>
+                            
+                            <div class="lg:col-span-3 p-6 shadow-md rounded-lg border border-slate-700 bg-slate-800/60 backdrop-blur-sm light:bg-white light:border-sky-200">
+                                <div id="tab-profile" class="settings-tab-content space-y-6">
+                                    <h3 class="text-xl font-semibold light:text-sky-900">My Profile</h3>
+                                    <div class="space-y-4">
+                                        <div class="space-y-2">
+                                            <label for="profile-name" class="text-sm font-medium leading-none text-slate-200 light:text-sky-800">Full Name</label>
+                                            <input id="profile-name" class="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 light:bg-white light:border-sky-300 light:text-sky-900" />
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="profile-email" class="text-sm font-medium leading-none text-slate-200 light:text-sky-800">Email Address</label>
+                                            <input id="profile-email" type="email" class="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 light:bg-white light:border-sky-300 light:text-sky-900" />
+                                        </div>
+                                        <button id="save-profile-btn" class="shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/40 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-slate-900 bg-violet-600 text-white hover:bg-violet-500 px-4 py-2 light:focus:ring-offset-sky-50">
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="tab-password" class="settings-tab-content hidden space-y-6">
+                                    <h3 class="text-xl font-semibold light:text-sky-900">Change Password</h3>
+                                    <div class="space-y-4">
+                                        <div class="space-y-2">
+                                            <label for="current-password" class="text-sm font-medium leading-none text-slate-200 light:text-sky-800">Current Password</label>
+                                            <input id="current-password" type="password" class="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 light:bg-white light:border-sky-300 light:text-sky-900" />
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="new-password" class="text-sm font-medium leading-none text-slate-200 light:text-sky-800">New Password</label>
+                                            <input id="new-password" type="password" class="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 light:bg-white light:border-sky-300 light:text-sky-900" />
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="confirm-new-password" class="text-sm font-medium leading-none text-slate-200 light:text-sky-800">Confirm New Password</label>
+                                            <input id="confirm-new-password" type="password" class="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 light:bg-white light:border-sky-300 light:text-sky-900" />
+                                        </div>
+                                        <button id="save-password-btn" class="shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/40 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-slate-900 bg-violet-600 text-white hover:bg-violet-500 px-4 py-2 light:focus:ring-offset-sky-50">
+                                            Change Password
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="tab-notifications" class="settings-tab-content hidden space-y-6">
+                                    <h3 class="text-xl font-semibold light:text-sky-900">Notifications</h3>
+                                    <p class="text-slate-400 light:text-sky-600">Manage your notification preferences.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-help" class="page-content mt-8 ml-8 hidden animate-fade-in">
+                    <div class="max-w-3xl space-y-6">
+                        <h2 class="text-3xl font-bold light:text-sky-900">Help & Support</h2>
+                        
+                        <div class="rounded-lg border border-slate-700 bg-slate-800/60 text-slate-100 shadow-sm backdrop-blur-sm p-8 shadow-md light:bg-white light:border-sky-200">
+                            <h3 class="text-xl font-semibold mb-6 light:text-sky-900">Frequently Asked Questions</h3>
+                            <div class="space-y-6">
+                                <div class="pb-6 border-b border-slate-700 last:border-0 last:pb-0 light:border-sky-200">
+                                    <h4 class="font-semibold mb-2 text-lg light:text-sky-900">How do I start a new transcription?</h4>
+                                    <p class="text-slate-400 leading-relaxed light:text-sky-700">Click the "Add Note" button on the dashboard. You can either drag and drop an existing audio file or click the "Start Live Recording" button.</p>
+                                </div>
+                                <div class="pb-6 border-b border-slate-700 last:border-0 last:pb-0 light:border-sky-200">
+                                    <h4 class="font-semibold mb-2 text-lg light:text-sky-900">What audio formats are supported?</h4>
+                                    <p class="text-slate-400 leading-relaxed light:text-sky-700">We currently support MP3, WAV, M4A, and FLAC for file uploads.</p>
+                                </div>
+                                <div class="pb-6 border-b border-slate-700 last:border-0 last:pb-0 light:border-sky-200">
+                                    <h4 class="font-semibold mb-2 text-lg light:text-sky-900">How do I manage my storage?</h4>
+                                    <p class="text-slate-400 leading-relaxed light:text-sky-700">Your current storage usage is visible on the dashboard. You can manage and delete old notes from the "My Notes" section to free up space.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            </main>
+    </div>
+
+    <div id="recording-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div id="modal-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative z-10 w-full max-w-md rounded-lg bg-slate-800 shadow-2xl border border-slate-700 p-6 light:bg-white light:border-sky-200">
+            <div class="mb-4">
+                <h2 class="text-2xl text-center font-semibold light:text-sky-900">Live Recording</h2>
+            </div>
+            <div class="text-center space-y-6 py-4">
+                <p id="recording-status" class="text-slate-400 light:text-sky-600">Click the microphone to start recording</p>
+                <div id="recording-timer" class="text-5xl font-semibold tracking-wider light:text-sky-900">00:00</div>
+                
+                <button
+                    id="record-toggle-btn"
+                    class="w-20 h-20 rounded-full flex items-center justify-center mx-auto transition-all shadow-lg bg-gradient-to-br from-violet-600 to-fuchsia-500 hover:opacity-90 shadow-lg shadow-violet-500/40"
+                >
+                    <svg id="record-icon-mic" class="w-8 h-8 text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line>
+                    </svg>
+                    <svg id="record-icon-stop" class="w-8 h-8 text-white hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                    </svg>
+                </button>
+                
+                <div class="flex gap-3 justify-center pt-4">
+                    <button id="modal-cancel-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-slate-900 border border-slate-600 hover:bg-slate-800 px-4 py-2 light:border-sky-300 light:hover:bg-sky-100 light:text-sky-900 light:focus:ring-offset-sky-50">
+                        Cancel
+                    </button>
+                    <button
+                        id="modal-transcribe-btn"
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:pointer-events-none bg-violet-600 text-white hover:bg-violet-500 px-4 py-2 shadow-md shadow-violet-500/20 light:focus:ring-offset-sky-50"
+                        disabled
+                    >
+                        Transcribe
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ai-chat-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div id="modal-chat-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative z-10 w-full max-w-lg rounded-lg bg-slate-800 shadow-2xl border border-slate-700 flex flex-col h-[70vh] light:bg-white light:border-sky-200">
+            <div class="flex items-center justify-between p-4 border-b border-slate-700 light:border-sky-200">
+                <div class="flex items-center gap-2">
+                    <svg class="w-6 h-6 text-fuchsia-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 16.5c-2.3 0-4.18-1.7-4.45-3.92h-1.1c-.27 2.22-2.15 3.92-4.45 3.92-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5c2.3 0 4.18 1.7 4.45 3.92h1.1c.27-2.22 2.15-3.92 4.45-3.92 2.48 0 4.5 2.02 4.5 4.5s-2.02 4.5-4.5 4.5z"></path>
+                    </svg>
+                    <h2 class="text-lg font-semibold light:text-sky-900">AI Assistant</h2>
+                </div>
+                <button id="modal-chat-close-btn" class="p-1 rounded-full text-slate-400 hover:bg-slate-700 light:text-sky-600 light:hover:bg-sky-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="chat-messages-container" class="flex-1 p-4 space-y-4 overflow-y-auto">
+                <div class="flex items-start gap-3">
+                    <span class="w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-500 to-slate-700 flex items-center justify-center flex-shrink-0 text-white shadow-lg shadow-fuchsia-500/30">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 16.5c-2.3 0-4.18-1.7-4.45-3.92h-1.1c-.27 2.22-2.15 3.92-4.45 3.92-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5c2.3 0 4.18 1.7 4.45 3.92h1.1c.27-2.22 2.15-3.92 4.45-3.92 2.48 0 4.5 2.02 4.5 4.5s-2.02 4.5-4.5 4.5z"></path>
+                        </svg>
+                    </span>
+                    <div class="bg-slate-700 p-3 rounded-lg rounded-tl-none light:bg-sky-100">
+                        <p class="text-sm light:text-sky-900">Hello! I'm your AI assistant. Type a quick note to add it, or ask me for help with your transcriptions.</p>
+                    </div>
+                </div>
+                </div>
+            <div class="p-4 border-t border-slate-700 light:border-sky-200">
+                <form id="chat-input-form" class="flex items-center gap-3">
+                    <button id="chat-file-menu-btn" type="button" class="p-2 rounded-full text-slate-400 hover:text-slate-100 hover:bg-slate-700 light:text-sky-600 light:hover:text-sky-900 light:hover:bg-sky-200 transition-colors">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                        </svg>
+                    </button>
+                    <input
+                        id="chat-input"
+                        type="text"
+                        placeholder="Type your message or note..."
+                        class="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 light:bg-white light:border-sky-300 light:text-sky-900"
+                        autocomplete="off"
+                    />
+                    <button
+                        id="chat-send-btn"
+                        type="submit"
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-slate-900 bg-violet-600 text-white hover:bg-violet-500 px-4 py-2 light:focus:ring-offset-white"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                            <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </form>
+
+                <div id="chat-file-menu" class="absolute bottom-16 left-4 z-20 hidden rounded-md bg-slate-800 shadow-xl border border-slate-700 light:bg-white light:border-sky-200 p-1 w-52">
+                    <button id="chat-upload-local-btn" class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm rounded-md text-slate-200 hover:bg-slate-700 light:text-slate-700 light:hover:bg-sky-100">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+                        Upload from Local Storage
+                    </button>
+                    <button id="chat-select-note-btn" class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm rounded-md text-slate-200 hover:bg-slate-700 light:text-slate-700 light:hover:bg-sky-100">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-7-5Z"></path><path d="M15 3v4a1 1 0 0 0 1 1h4"></path></svg>
+                        Select from My Notes
+                    </button>
+                </div>
+                <input id="chat-file-upload-hidden" type="file" class="hidden" accept="audio/*, .txt, .md"/>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const hidethehell=(value)=>{
+                console.log("chud gye");
+                document.querySelector(".unique").style.display=value;
+            }
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- State Variables ---
+            let currentPage = 'dashboard';
+            let activeSettingsTab = 'profile';
+            let isRecording = false;
+            let recordingTime = 0;
+            let recordingTimerRef;
+            let mediaRecorder;
+            let audioChunks = [];
+            // **MODIFICATION 1: No longer need lastTranscribedFile, we use dynamic data**
+            // let lastTranscribedFile = null; 
+            let allNotesCache = []; // Cache for notes to use in chat
+
+            // --- Element Selectors ---
+            // ... (selectors remain the same)
+            const sidebarNav = document.getElementById('sidebar-nav');
+            const navButtons = document.querySelectorAll('.nav-button');
+            const pageContents = document.querySelectorAll('.page-content');
+            
+            const dropdownContainer = document.getElementById('dropdown-container');
+            const dropdownTrigger = document.getElementById('dropdown-trigger');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            const dropdownProfileBtn = document.getElementById('dropdown-profile-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            // **MODIFICATION 4: Profile sidebar elements**
+            const sidebarInitials = document.getElementById('sidebar-initials');
+            const sidebarName = document.getElementById('sidebar-name');
+
+            const settingsNav = document.getElementById('settings-nav');
+            const settingsTabButtons = document.querySelectorAll('.settings-tab-btn');
+            const settingsTabContents = document.querySelectorAll('.settings-tab-content');
+
+            const addNoteBtn = document.getElementById('add-note-btn');
+            const startRecordingBtn = document.getElementById('start-recording-btn');
+            const aiChatBtn = document.getElementById('ai-chat-btn');
+            
+            const recordingModal = document.getElementById('recording-modal');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            const modalTranscribeBtn = document.getElementById('modal-transcribe-btn');
+            const recordToggleBtn = document.getElementById('record-toggle-btn');
+            const recordIconMic = document.getElementById('record-icon-mic');
+            const recordIconStop = document.getElementById('record-icon-stop');
+            const recordingStatus = document.getElementById('recording-status');
+            const recordingTimer = document.getElementById('recording-timer');
+            
+            const aiChatModal = document.getElementById('ai-chat-modal');
+            const modalChatOverlay = document.getElementById('modal-chat-overlay');
+            const modalChatCloseBtn = document.getElementById('modal-chat-close-btn');
+            const chatMessagesContainer = document.getElementById('chat-messages-container');
+            const chatInputForm = document.getElementById('chat-input-form');
+            const chatInput = document.getElementById('chat-input');
+
+            // NEW ELEMENTS FOR FILE ATTACHMENT
+            const chatFileMenuBtn = document.getElementById('chat-file-menu-btn');
+            const chatFileMenu = document.getElementById('chat-file-menu');
+            const chatUploadLocalBtn = document.getElementById('chat-upload-local-btn');
+            const chatSelectNoteBtn = document.getElementById('chat-select-note-btn');
+            const chatFileUploadHidden = document.getElementById('chat-file-upload-hidden');
+            
+            const dropZone = document.getElementById('drop-zone');
+            const fileUpload = document.getElementById('file-upload');
+            const uploadStatus = document.getElementById('upload-status');
+            // **MODIFICATION 2: Template select element**
+            const templateSelect = document.getElementById('template-select');
+            
+            // **MODIFICATION 4: Profile settings fields**
+            const saveProfileBtn = document.getElementById('save-profile-btn');
+            const profileNameInput = document.getElementById('profile-name');
+            const profileEmailInput = document.getElementById('profile-email');
+            
+            const savePasswordBtn = document.getElementById('save-password-btn');
+            
+            // **MODIFICATION 1 & 3: Dynamic data targets**
+            const notesTableBody = document.getElementById('notes-table-body');
+            const recentNotesContainer = document.getElementById('recent-notes-container');
+            const statsNotesThisWeek = document.getElementById('stats-notes-this-week');
+            // --- End Element Selectors ---
+
+            // --- Toast Notification Function ---
+            const showToast = (title, description, variant = 'default') => {
+                const toaster = document.getElementById('toaster-container');
+                const toast = document.createElement('div');
+                toast.className = `p-4 rounded-lg shadow-lg max-w-sm animate-toast-in ${
+                    variant === 'destructive'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-slate-900 text-white border border-slate-700 light:bg-white light:text-sky-900 light:border-sky-200'
+                }`;
+                toast.innerHTML = `
+                    <h3 class="font-semibold">${title}</h3>
+                    <p class="text-sm">${description}</p>
+                `;
+                toaster.appendChild(toast);
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            };
+
+            // --- Page Navigation ---
+            const navigateTo = (pageId) => {
+                currentPage = pageId;
+                
+                // Hide all pages
+                pageContents.forEach(page => page.classList.add('hidden'));
+                
+                // Show target page
+                const targetPage = document.getElementById(`page-${pageId}`);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                }
+                
+                // **MODIFICATION 1: Refresh notes if navigating to My Notes**
+                if (pageId === 'my-notes' || pageId === 'dashboard') {
+                    loadDashboardData();
+                }
+
+                // Update sidebar button styles
+                navButtons.forEach(btn => {
+                    const btnPage = btn.dataset.page;
+                    const icon = btn.querySelector('svg');
+                    
+                    if (btnPage === pageId) {
+                        // Active styles
+                        btn.classList.add('bg-gradient-to-r', 'from-violet-600', 'to-fuchsia-500', 'text-white', 'shadow-lg', 'shadow-violet-500/40');
+                        btn.classList.remove('text-slate-300/70', 'hover:bg-slate-800', 'hover:text-slate-100', 'light:text-slate-500', 'light:hover:bg-sky-100', 'light:hover:text-sky-900');
+                        if (icon) icon.classList.add('drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]');
+                    } else {
+                        // Inactive styles
+                        btn.classList.remove('bg-gradient-to-r', 'from-violet-600', 'to-fuchsia-500', 'text-white', 'shadow-lg', 'shadow-violet-500/40');
+                        btn.classList.add('text-slate-300/70', 'hover:bg-slate-800', 'hover:text-slate-100', 'light:text-slate-500', 'light:hover:bg-sky-100', 'light:hover:text-sky-900');
+                        if (icon) icon.classList.remove('drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]');
+                    }
+                });
+            };
+
+            sidebarNav.addEventListener('click', (e) => {
+                const button = e.target.closest('.nav-button');
+                if (button && button.dataset.page) {
+                    navigateTo(button.dataset.page);
+                }
+            });
+            
+            // "Add Note" button also goes to "new-transcription"
+            addNoteBtn.addEventListener('click', () => {
+                // Reset file upload state if necessary
+                if (uploadStatus) uploadStatus.textContent = '';
+                fileUpload.value = null; // Clear any previous file selection
+                templateSelect.value = ""; // Reset template dropdown
+                navigateTo('new-transcription');
+            });
+
+            // --- Profile Dropdown & Settings ---
+            dropdownTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdownContainer.contains(e.target)) {
+                    dropdownMenu.classList.add('hidden');
+                }
+            });
+
+            dropdownProfileBtn.addEventListener('click', () => {
+                navigateTo('settings');
+                navigateToSettingsTab('profile');
+                dropdownMenu.classList.add('hidden');
+            });
+
+            // **MODIFICATION 5: Logout Button (Confirmed)**
+            logoutBtn.addEventListener('click', () => {
+                showToast('Logged Out', 'You have been successfully logged out.');
+                dropdownMenu.classList.add('hidden');
+                window.location.href = 'login.html'; // Redirect to login page
+            });
+
+            // --- Settings Tabs ---
+            const navigateToSettingsTab = (tabId) => {
+                activeSettingsTab = tabId;
+
+                settingsTabContents.forEach(content => {
+                    content.id === `tab-${tabId}` ? content.classList.remove('hidden') : content.classList.add('hidden');
+                });
+                
+                settingsTabButtons.forEach(btn => {
+                    const btnTab = btn.dataset.tab;
+                    if (btnTab === tabId) {
+                        btn.classList.add('bg-violet-600/10', 'text-violet-400', 'shadow-md', 'shadow-violet-500/10', 'light:bg-violet-600/10', 'light:text-violet-600');
+                        btn.classList.remove('text-slate-400', 'hover:bg-slate-700', 'hover:text-slate-100', 'light:text-sky-600', 'light:hover:bg-sky-100', 'light:hover:text-sky-900');
+                    } else {
+                        btn.classList.remove('bg-violet-600/10', 'text-violet-400', 'shadow-md', 'shadow-violet-500/10', 'light:bg-violet-600/10', 'light:text-violet-600');
+                        btn.classList.add('text-slate-400', 'hover:bg-slate-700', 'hover:text-slate-100', 'light:text-sky-600', 'light:hover:bg-sky-100', 'light:hover:text-sky-900');
+                    }
+                });
+            };
+            
+            settingsNav.addEventListener('click', (e) => {
+                const button = e.target.closest('.settings-tab-btn');
+                if (button && button.dataset.tab) {
+                    navigateToSettingsTab(button.dataset.tab);
+                }
+            });
+            
+            
+            // **MODIFICATION 4: Save Profile listener**
+            saveProfileBtn.addEventListener('click', async () => {
+                const name = profileNameInput.value;
+                const email = profileEmailInput.value;
+
+                try {
+                    const response = await fetch('/api/profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email })
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to save profile');
+                    
+                    showToast('Success', 'Profile updated successfully!');
+                    loadProfile(); // Re-fetch profile to update sidebar
+                
+                } catch (error) {
+                    showToast('Error', error.message, 'destructive');
+                }
+            });
+            
+            savePasswordBtn.addEventListener('click', () => {
+                // This remains a demo as no backend endpoint exists for it
+                showToast('Success', 'Password changed successfully! (Demo)');
+            });
+            // --- End Profile Dropdown & Settings ---
+
+            // --- **NEW** Helper Function for Relative Time ---
+            function formatRelativeTime(timestamp) {
+                const now = new Date();
+                const past = new Date(timestamp * 1000); // API sends seconds
+                const secondsAgo = Math.floor((now - past) / 1000);
+
+                if (secondsAgo < 60) return `${secondsAgo}s ago`;
+                const minutesAgo = Math.floor(secondsAgo / 60);
+                if (minutesAgo < 60) return `${minutesAgo}m ago`;
+                const hoursAgo = Math.floor(minutesAgo / 60);
+                if (hoursAgo < 24) return `${hoursAgo}h ago`;
+                const daysAgo = Math.floor(hoursAgo / 24);
+                if (daysAgo < 7) return `${daysAgo}d ago`;
+                
+                return past.toLocaleDateString();
+            }
+
+            // --- **NEW** Function to load dynamic data (Req 1 & 3) ---
+            const loadDashboardData = async () => {
+                try {
+                    // Fetch Stats (Request 3)
+                    const statsResponse = await fetch('/api/stats');
+                    if (statsResponse.ok) {
+                        const statsData = await statsResponse.json();
+                        statsNotesThisWeek.textContent = `${statsData.notes_this_week} notes this week`;
+                    } else {
+                        statsNotesThisWeek.textContent = `0 notes this week`;
+                    }
+
+                    // Fetch Notes (Request 1)
+                    const notesResponse = await fetch('/api/notes');
+                    if (!notesResponse.ok) throw new Error('Failed to fetch notes');
+                    
+                    const notes = await notesResponse.json();
+                    allNotesCache = notes; // Update the cache
+
+                    // Clear existing content
+                    recentNotesContainer.innerHTML = '';
+                    notesTableBody.innerHTML = '';
+
+                    if (notes.length === 0) {
+                        recentNotesContainer.innerHTML = `<p class="text-slate-400 col-span-3 text-center">No notes found. Add one to get started!</p>`;
+                        notesTableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-slate-400">No notes found.</td></tr>`;
+                        return;
+                    }
+
+                    // Populate "Recent Notes" (Max 3)
+                    notes.slice(0, 3).forEach(note => {
+                        const noteEl = document.createElement('button');
+                        noteEl.className = "group text-left p-4 rounded-xl bg-slate-800/60 backdrop-blur-sm hover:bg-slate-800/80 border border-slate-700/50 hover:border-violet-500/50 shadow-md hover:shadow-lg transition-all light:bg-white light:hover:bg-white/80 light:border-sky-200 light:hover:border-violet-400";
+                        // Attach data for the chat modal
+                        noteEl.dataset.filename = note.filename;
+                        noteEl.dataset.title = note.title;
+
+                        noteEl.innerHTML = `
+                            <div class="flex items-start gap-3 pointer-events-none">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-600/20 to-fuchsia-500/20 flex items-center justify-center flex-shrink-0 shadow-md shadow-violet-500/20 light:from-violet-600/10 light:to-fuchsia-500/10">
+                                    <svg class="w-5 h-5 text-violet-400 drop-shadow-[0_0_5px_rgba(192,132,252,0.8)] light:text-violet-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-7-5Z"></path><path d="M15 3v4a1 1 0 0 0 1 1h4"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-medium text-slate-100 truncate group-hover:text-violet-400 transition-colors light:text-sky-900 light:group-hover:text-violet-600">
+                                        ${note.title}
+                                    </h3>
+                                    <p class="text-xs text-slate-400 truncate light:text-sky-600">${formatRelativeTime(note.mtime)}</p>
+                                </div>
+                            </div>
+                        `;
+                        // Add click listener to open AI chat with this note
+                        noteEl.addEventListener('click', () => {
+                            attachNoteToChat(note.title);
+                            openChatModal();
+                        });
+                        recentNotesContainer.appendChild(noteEl);
+                    });
+
+                    // Populate "My Notes" table
+                    notes.forEach(note => {
+                        const row = document.createElement('tr');
+                        row.className = "hover:bg-slate-800/30 transition-colors light:hover:bg-sky-50";
+                        row.innerHTML = `
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-100 light:text-sky-900">${note.title}</div>
+                            </td>
+                            <td class="px-6 py-4 text-slate-400 light:text-sky-700">${formatRelativeTime(note.mtime)}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex gap-4">
+                                    <button data-title="${note.title}" class="chat-open-btn text-violet-400 hover:text-violet-300 font-medium transition-colors flex items-center gap-1 light:text-violet-600 light:hover:text-violet-500">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                        Open
+                                    </button>
+                                    <button data-filename="${note.filename}" class="download-btn text-violet-400 hover:text-violet-300 font-medium transition-colors flex items-center gap-1 light:text-violet-600 light:hover:text-violet-500">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18v-6"></path><path d="m9 15 3 3 3-3"></path>
+                                        </svg>
+                                        Export
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        notesTableBody.appendChild(row);
+                    });
+
+                    // Add event listeners for the new dynamic buttons
+                    notesTableBody.querySelectorAll('.download-btn').forEach(btn => {
+                        btn.addEventListener('click', () => downloadNote(btn.dataset.filename));
+                    });
+                    notesTableBody.querySelectorAll('.chat-open-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            attachNoteToChat(btn.dataset.title);
+                            openChatModal();
+                        });
+                    });
+
+                } catch (error) {
+                    console.error("Error loading dashboard data:", error);
+                    recentNotesContainer.innerHTML = `<p class="text-red-400 col-span-3 text-center">Error loading notes.</p>`;
+                    notesTableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-red-400">Error loading notes.</td></tr>`;
+                    statsNotesThisWeek.textContent = `Error loading stats`;
+                }
+            };
+            
+            // --- **NEW** Function to load profile data (Req 4) ---
+            const loadProfile = async () => {
+                try {
+                    const response = await fetch('/api/profile');
+                    if (!response.ok) throw new Error('Failed to load profile');
+                    
+                    const user = await response.json();
+                    
+                    // Update settings page
+                    profileNameInput.value = user.name || '';
+                    profileEmailInput.value = user.email || '';
+                    
+                    const name = user.name || 'User';
+                    const initials = (user.initials || name.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase()) || 'U';
+                    // Update sidebar
+                    sidebarName.textContent = name;
+                    sidebarInitials.textContent =initials;
+
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    showToast('Error', 'Could not load user profile.', 'destructive');
+                }
+            };
+
+            // --- **MODIFIED** Download Function (Req 1) ---
+            const downloadNote = (filename) => {
+                // This function now uses the specific filename passed to it
+                if (!filename) {
+                    showToast('Error', 'Invalid filename for download.', 'destructive');
+                    return;
+                }
+                // Flask endpoint will serve the generated file
+                window.open(`/download/${filename}`, '_blank');
+                showToast('Downloading', `Starting download for ${filename}...`);
+            };
+            // Make it globally accessible for the dynamic buttons
+            window.downloadNote = downloadNote;
+
+
+            // --- Recording Modal & Logic (Mostly unchanged) ---
+            const openRecordingModal = () => recordingModal.classList.remove('hidden');
+            const closeRecordingModal = () => {
+                if (isRecording) stopRecording();
+                recordingTime = 0;
+                recordingTimer.textContent = '00:00';
+                recordingStatus.textContent = 'Click the microphone to start recording';
+                audioChunks = [];
+                modalTranscribeBtn.disabled = true;
+                recordingModal.classList.add('hidden');
+            };
+
+            startRecordingBtn.addEventListener('click', openRecordingModal);
+            modalOverlay.addEventListener('click', closeRecordingModal);
+            modalCancelBtn.addEventListener('click', closeRecordingModal);
+
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            };
+
+            const startRecording = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        recordingStatus.textContent = "Recording finished. Ready to transcribe.";
+                        stream.getTracks().forEach((track) => track.stop());
+                        modalTranscribeBtn.disabled = false;
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordingStatus.textContent = "Recording in progress...";
+                    recordToggleBtn.classList.add('bg-red-600', 'hover:bg-red-600/90', 'shadow-lg', 'shadow-red-500/40');
+                    recordToggleBtn.classList.remove('bg-gradient-to-br', 'from-violet-600', 'to-fuchsia-500', 'shadow-violet-500/40');
+                    recordIconMic.classList.add('hidden');
+                    recordIconStop.classList.remove('hidden');
+                    
+                    recordingTime = 0;
+                    recordingTimer.textContent = '00:00';
+                    recordingTimerRef = setInterval(() => {
+                        recordingTime++;
+                        recordingTimer.textContent = formatTime(recordingTime);
+                    }, 1000);
+
+                } catch (err) {
+                    console.error("Error accessing microphone:", err);
+                    recordingStatus.textContent = "Could not access microphone. Please check permissions.";
+                    showToast('Error', 'Microphone access denied. Check your browser settings.', 'destructive');
+                }
+            };
+
+            const stopRecording = () => {
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    mediaRecorder.stop();
+                }
+                isRecording = false;
+                clearInterval(recordingTimerRef);
+                recordToggleBtn.classList.remove('bg-red-600', 'hover:bg-red-600/90', 'shadow-lg', 'shadow-red-500/40');
+                recordToggleBtn.classList.add('bg-gradient-to-br', 'from-violet-600', 'to-fuchsia-500', 'shadow-violet-500/40');
+                recordIconMic.classList.remove('hidden');
+                recordIconStop.classList.add('hidden');
+            };
+            
+            recordToggleBtn.addEventListener('click', () => {
+                isRecording ? stopRecording() : startRecording();
+            });
+            
+            // **MODIFIED** Transcribe button adds template
+            modalTranscribeBtn.addEventListener('click', () => {
+                if (audioChunks.length > 0) {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'live_recording.webm');
+                    
+                    // **MODIFICATION 2: Add template from dropdown**
+                    const selectedTemplate = templateSelect.value;
+                    if (selectedTemplate) {
+                        formData.append('template', selectedTemplate);
+                    }
+                    
+                    showToast('Processing Recording', 'Uploading and transcribing live recording...');
+                    
+                    fetchAndTranscribe(formData);
+                }
+                closeRecordingModal();
+            });
+
+            // --- File Upload / Drag & Drop (Transcription Page) ---
+            // **MODIFIED** to refresh data on success
+            const fetchAndTranscribe = async (formData) => {
+                try {
+                    const response = await fetch('/api/transcribe', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    // Handle 401/500+ errors that aren't JSON
+                    if (!response.ok) {
+                        let errorText = `HTTP error! status: ${response.status}`;
+                        try {
+                            // Try to parse a JSON error response from the server
+                            const errorData = await response.json();
+                            if (errorData.error) {
+                                errorText = errorData.error;
+                            }
+                        } catch (e) {
+                            // Response wasn't JSON, use status text
+                            errorText = response.statusText;
+                        }
+                        throw new Error(errorText);
+                    }
+
+                    const data = await response.json();
+
+                    // Handle JSON-based error responses (e.g., from transcribe_audio)
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // Success!
+                    showToast('Success', `Transcription and note generation complete! Title: ${data.title}`, 'default');
+                    uploadStatus.textContent = '';
+                    
+                    // **MODIFICATION 1: Reload data and navigate**
+                    await loadDashboardData(); // Await reload to ensure data is fresh
+                    navigateTo('my-notes'); // Navigate to the notes page on success
+
+                } catch (error) {
+                    console.error("Transcription failed:", error);
+                    showToast('Network Error', `${error.message}`, 'destructive');
+                    uploadStatus.textContent = 'Upload failed.';
+                }
+            };
+
+            // **MODIFIED** to add template data
+            const handleFileSelect = (file) => {
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('audio', file);
+                    
+                    // **MODIFICATION 2: Add template from dropdown**
+                    const selectedTemplate = templateSelect.value;
+                    if (selectedTemplate) {
+                        formData.append('template', selectedTemplate);
+                    }
+
+                    uploadStatus.textContent = `Uploading ${file.name}...`;
+                    fetchAndTranscribe(formData);
+                } else {
+                    showToast('Error', 'Invalid file type. Please upload an audio file.', 'destructive');
+                }
+            };
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-violet-500', 'bg-violet-500/10', 'shadow-lg', 'shadow-violet-500/30', 'light:bg-violet-500/10');
+            });
+            
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-violet-500', 'bg-violet-500/10', 'shadow-lg', 'shadow-violet-500/30', 'light:bg-violet-500/10');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-violet-500', 'bg-violet-500/10', 'shadow-lg', 'shadow-violet-500/30', 'light:bg-violet-500/10');
+                const file = e.dataTransfer.files[0];
+                handleFileSelect(file);
+            });
+            
+            dropZone.addEventListener('click', () => fileUpload.click());
+            
+            fileUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                handleFileSelect(file);
+            });
+
+            // --- AI Chat Modal ---
+            const openChatModal = () => aiChatModal.classList.remove('hidden');
+            const closeChatModal = () => aiChatModal.classList.add('hidden');
+
+            aiChatBtn.addEventListener('click', openChatModal);
+            modalChatOverlay.addEventListener('click', closeChatModal);
+            modalChatCloseBtn.addEventListener('click', closeChatModal);
+
+            // **NEW** Helper to attach note to chat
+            const attachNoteToChat = (title) => {
+                showToast('Note Attached', `Selected "${title}" for AI analysis.`);
+                chatInputForm.dataset.attachedNote = title;
+                chatInput.placeholder = `Ask about ${title}...`;
+            };
+
+            // --- AI Chat File Menu Logic ---
+            chatFileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                chatFileMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                // Close chat file menu if clicking outside
+                if (!chatFileMenuBtn.contains(e.target) && !chatFileMenu.contains(e.target)) {
+                    chatFileMenu.classList.add('hidden');
+                }
+            });
+
+            chatUploadLocalBtn.addEventListener('click', () => {
+                chatFileUploadHidden.click();
+                chatFileMenu.classList.add('hidden');
+            });
+
+            chatFileUploadHidden.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    showToast('File Attached', `File ${file.name} attached. Ask a question about it.`);
+                    // We don't upload yet. We wait for the chat message.
+                    // This example will just pass the *name* to the /api/chat endpoint
+                    // The python code would need to be updated to handle this 'attached_file'
+                    chatInputForm.dataset.attachedFile = file.name; 
+                    chatInput.placeholder = `Ask about ${file.name}...`;
+                }
+            });
+
+            chatSelectNoteBtn.addEventListener('click', () => {
+                // **MODIFIED** to use the cache
+                if (allNotesCache.length > 0) {
+                    // Just attach the *most recent* note for this demo
+                    const mostRecentNote = allNotesCache[0];
+                    attachNoteToChat(mostRecentNote.title);
+                } else {
+                    showToast('Info', 'No recent file to analyze. Try transcribing one first.', 'default');
+                }
+                chatFileMenu.classList.add('hidden');
+            });
+
+            // --- AI Chat Submit Logic (Now talking to Flask) ---
+            chatInputForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const message = chatInput.value.trim();
+                const attachedNote = chatInputForm.dataset.attachedNote;
+                const attachedFile = chatInputForm.dataset.attachedFile; // Not fully implemented on backend
+
+                if (!message) return;
+
+                // 1. Add User's message
+                const userMessageEl = document.createElement('div');
+                userMessageEl.className = "flex justify-end";
+                userMessageEl.innerHTML = `
+                    <div class="bg-violet-600 text-white p-3 rounded-lg rounded-br-none">
+                        <p class="text-sm">${message}</p>
+                        ${attachedNote ? `<p class="text-xs text-violet-200 pt-1 mt-1 border-t border-violet-400">Context: ${attachedNote}</p>` : ''}
+                    </div>
+                `;
+                chatMessagesContainer.appendChild(userMessageEl);
+
+                // 2. Clear input & scroll
+                chatInput.value = '';
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+                
+                // Set initial bot message (Thinking...)
+                const botMessageEl = document.createElement('div');
+                botMessageEl.className = "flex items-start gap-3";
+                botMessageEl.innerHTML = `
+                    <span class="w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-500 to-slate-700 flex items-center justify-center flex-shrink-0 text-white shadow-lg shadow-fuchsia-500/30">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 16.5c-2.3 0-4.18-1.7-4.45-3.92h-1.1c-.27 2.22-2.15 3.92-4.45 3.92-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5c2.3 0 4.18 1.7 4.45 3.92h1.1c.27-2.22 2.15-3.92 4.45-3.92 2.48 0 4.5 2.02 4.5 4.5s-2.02 4.5-4.5 4.5z"></path>
+                        </svg>
+                    </span>
+                    <div class="bg-slate-700 p-3 rounded-lg rounded-tl-none light:bg-sky-100">
+                        <p class="text-sm light:text-sky-900">AI is thinking...</p>
+                    </div>
+                `;
+                chatMessagesContainer.appendChild(botMessageEl);
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
+
+                try {
+                    const chatResponse = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            attached_note: attachedNote, // Send the attached note name
+                            attached_file: attachedFile, // Send the attached file name
+                        }),
+                    });
+
+                    if (!chatResponse.ok) {
+                        throw new Error(`HTTP error! status: ${chatResponse.status}`);
+                    }
+
+                    const data = await chatResponse.json();
+                    
+                    // Remove "AI is thinking..." message
+                    botMessageEl.remove();
+
+                    // Add final bot response
+                    const finalBotMessageEl = document.createElement('div');
+                    finalBotMessageEl.className = "flex items-start gap-3";
+                    finalBotMessageEl.innerHTML = `
+                        <span class="w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-500 to-slate-700 flex items-center justify-center flex-shrink-0 text-white shadow-lg shadow-fuchsia-500/30">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 16.5c-2.3 0-4.18-1.7-4.45-3.92h-1.1c-.27 2.22-2.15 3.92-4.45 3.92-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5c2.3 0 4.18 1.7 4.45 3.92h1.1c.27-2.22 2.15-3.92 4.45-3.92 2.48 0 4.5 2.02 4.5 4.5s-2.02 4.5-4.5 4.5z"></path>
+                            </svg>
+                        </span>
+                        <div class="bg-slate-700 p-3 rounded-lg rounded-tl-none light:bg-sky-100">
+                            <p class="text-sm light:text-sky-900">${data.response || "Sorry, I encountered an error."}</p>
+                        </div>
+                    `;
+                    chatMessagesContainer.appendChild(finalBotMessageEl);
+
+                    // Clear attachment state and reset placeholder
+                    delete chatInputForm.dataset.attachedNote;
+                    delete chatInputForm.dataset.attachedFile;
+                    chatInput.placeholder = "Type your message or note...";
+
+                    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
+                } catch (error) {
+                    console.error("Chat error:", error);
+                    // Remove "AI is thinking..." message
+                    botMessageEl.remove();
+
+                    // Add error bot response
+                    const errorBotMessageEl = document.createElement('div');
+                    errorBotMessageEl.className = "flex items-start gap-3";
+                    errorBotMessageEl.innerHTML = `
+                        <span class="w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-500 to-slate-700 flex items-center justify-center flex-shrink-0 text-white shadow-lg shadow-fuchsia-500/30">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 16.5c-2.3 0-4.18-1.7-4.45-3.92h-1.1c-.27 2.22-2.15 3.92-4.45 3.92-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5c2.3 0 4.18 1.7 4.45 3.92h1.1c.27-2.22 2.15-3.92 4.45-3.92 2.48 0 4.5 2.02 4.5 4.5s-2.02 4.5-4.5 4.5z"></path>
+                            </svg>
+                        </span>
+                        <div class="bg-slate-700 p-3 rounded-lg rounded-tl-none light:bg-sky-100">
+                            <p class="text-sm text-red-400">Sorry, I couldn't connect. ${error.message}</p>
+                        </div>
+                    `;
+                    chatMessagesContainer.appendChild(errorBotMessageEl);
+                    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+                }
+            });
+            
+            // --- Templates Page Logic ---
+            // This just makes the template cards clickable, selecting the template
+            // and moving to the "Add Note" page.
+            document.querySelectorAll('[data-template-id]').forEach(card => {
+                card.addEventListener('click', () => {
+                    const templateName = card.dataset.templateName;
+                    navigateTo('new-transcription');
+                    
+                    // Set the dropdown value
+                    if (templateSelect) {
+                        templateSelect.value = templateName;
+                    }
+                    showToast('Template Selected', `${templateName} is ready.`);
+                });
+            });
+
+            // --- Initial Page Load ---
+            // **MODIFICATION 1, 3, 4: Call all data-loading functions**
+            loadDashboardData();
+            loadProfile();
+            
+        });
+    </script>
+</body>
+</html>

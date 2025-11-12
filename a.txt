@@ -1,0 +1,3 @@
+$env:GEMINI_API_KEY = "Use your real APi ey Here"
+echo $env:GEMINI_API_KEY
+python main.py

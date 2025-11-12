@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Transcripto</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Apply the Inter font family */
+/* ... existing code ... -->
+        font-family: 'Inter', sans-serif;
+      }
+      
+      /* Define the new floating animation */
+      @keyframes floatUp {
+        0%   { transform: translateY(110vh); opacity: 0; }
+        10%  { opacity: 1; }
+        /* Use the CSS variables set by JS for horizontal drift */
+        25%  { transform: translateY(75vh) translateX(var(--x-start)); }
+        50%  { transform: translateY(50vh) translateX(var(--x-mid)); }
+        75%  { transform: translateY(25vh) translateX(var(--x-end)); }
+        90%  { opacity: 1; }
+        100% { transform: translateY(-110vh) translateX(var(--x-end)); opacity: 0; }
+      }
+
+      /* Style for the new JS-generated words */
+      .word {
+        position: absolute;
+        top: 0; /* Will be transformed */
+        opacity: 0; /* Start invisible */
+        animation: floatUp linear infinite;
+        will-change: transform, opacity;
+      }
+    </style>
+</head>
+<body class="bg-slate-900 text-gray-300 flex items-center justify-center min-h-screen p-4 overflow-hidden">
+
+    <!-- Animated Background Container - Now a single container for JS -->
+    <div id="floating-words" class="absolute inset-0 z-0 overflow-hidden pointer-events-none text-xs md:text-sm whitespace-nowrap">
+        <!-- Words will be dynamically added here by JavaScript -->
+    </div>
+
+    <!-- Page Container -->
+    <div class="w-full max-w-md z-10 relative">
+
+        <!-- Login Card -->
+        <div id="login-page" class="bg-slate-800/70 backdrop-blur-md rounded-lg shadow-2xl shadow-cyan-500/10 p-8 border border-white/10">
+            
+            <!-- Header -->
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-cyan-400">
+                    Transcripto
+                </h1>
+                <p class="mt-2 text-sm text-gray-300">
+                    Ready to Begin your Transcription Journey!
+                </p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="mt-8 space-y-6" action="#" method="POST">
+                <!-- Email Input -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-200">
+                        Email address
+                    </label>
+                    <div class="mt-1">
+                        <input id="email" name="email" type="email" autocomplete="email" required
+                               class="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-200">
+                        Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="password" name="password" type="password" autocomplete="current-password" required
+                               class="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Forgot Password Link -->
+                <div class="flex items-center justify-end">
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-cyan-400 hover:text-cyan-300">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Login Button -->
+                <div>
+                    <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-cyan-400 transition duration-150 ease-in-out">
+                        Login
+                    </button>
+                </div>
+            </form>
+
+            <!-- Sign-up Link -->
+            <p class="mt-6 text-center text-sm text-gray-300">
+                No credentials?
+                <a href="#" id="go-to-signup" class="font-medium text-cyan-400 hover:text-cyan-300 cursor-pointer">
+                    Sign up
+                </a>
+            </p>
+
+        </div>
+        <!-- End Login Card -->
+
+        <!-- Sign-up Card (Initially Hidden) -->
+        <div id="signup-page" class="hidden bg-slate-800/70 backdrop-blur-md rounded-lg shadow-2xl shadow-cyan-500/10 p-8 border border-white/10">
+            
+            <!-- Header -->
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-cyan-400">
+                    Create Account
+                </h1>
+                <p class="mt-2 text-sm text-gray-300">
+                    Join the future of transcription
+                </p>
+            </div>
+
+            <!-- Sign-up Form -->
+            <form id="signup-form" class="mt-8 space-y-6" action="#" method="POST">
+                <!-- Name Input -->
+                <div>
+                    <label for="signup-name" class="block text-sm font-medium text-gray-200">
+                        Full Name
+                    </label>
+                    <div class="mt-1">
+                        <input id="signup-name" name="name" type="text" autocomplete="name" required
+                               class="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 sm:text-sm">
+                    </div>
+                </div>
+                
+                <!-- Email Input -->
+                <div>
+                    <label for="signup-email" class="block text-sm font-medium text-gray-200">
+                        Email address
+                    </label>
+                    <div class="mt-1">
+                        <input id="signup-email" name="email" type="email" autocomplete="email" required
+                               class="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div>
+                    <label for="signup-password" class="block text-sm font-medium text-gray-200">
+                        Create Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="signup-password" name="password" type="password" autocomplete="new-password" required
+                               class="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-white placeholder-gray-40m focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Sign-up Button -->
+                <div>
+                    <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-cyan-400 transition duration-150 ease-in-out">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <!-- Login Link -->
+            <p id="signup-message" class="mt-6 text-center text-sm text-gray-300">
+                Already have an account?
+                <a href="#" id="go-to-login" class="font-medium text-cyan-400 hover:text-cyan-300 cursor-pointer">
+                    Login
+                </a>
+            </p>
+
+        </div>
+        <!-- End Sign-up Card -->
+
+    </div> 
+    <!-- End Page Container -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginPage = document.getElementById('login-page');
+            const signupPage = document.getElementById('signup-page');
+            
+            const goToSignupLink = document.getElementById('go-to-signup');
+            const goToLoginLink = document.getElementById('go-to-login');
+            
+            const signupForm = document.getElementById('signup-form');
+            const signupMessage = document.getElementById('signup-message');
+
+            // 🌟 NEW: Get the login form element
+            const loginForm = document.getElementById('login-form'); 
+
+            // Switch to Sign-up page
+            goToSignupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginPage.classList.add('hidden');
+                signupPage.classList.remove('hidden');
+            });
+
+            // Switch back to Login page
+            goToLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                signupPage.classList.add('hidden');
+                loginPage.classList.remove('hidden');
+            });
+
+            // 🚀 NEW LOGIC: Handle Login form submission to redirect
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); // Stop the default POST which causes the error
+                    
+                    // Simulate success and immediately redirect to dashboard
+                    // This uses a simple GET request for navigation
+                    window.location.href = 'dashboard.html'; 
+                });
+            }
+
+            // Handle Sign-up form submission
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Stop the form from submitting normally
+                
+                // Show a success message
+                signupMessage.innerHTML = '<span class="text-green-400">Sign-up successful! Redirecting to login...</span>';
+                
+                // Wait 2 seconds, then switch to the login page
+                setTimeout(() => {
+                    signupPage.classList.add('hidden');
+                    loginPage.classList.remove('hidden');
+                    
+                    // Reset the sign-up message for next time
+                    signupMessage.innerHTML = `
+                        Already have an account?
+                        <a href="#" id="go-to-login" class="font-medium text-cyan-400 hover:text-cyan-300 cursor-pointer">
+                            Login
+                        </a>
+                    `;
+                    // We need to re-add the event listener to the new link
+                    document.getElementById('go-to-login').addEventListener('click', (ev) => {
+                        ev.preventDefault();
+                        signupPage.classList.add('hidden');
+                        loginPage.classList.remove('hidden');
+                    });
+                }, 2000); // 2-second delay
+            });
+            
+            // --- New Floating Words Script (Remains unchanged) ---
+            const words=["AI","Voice","Transcribe","Gemini","Notes","Automation","Speech","Smart","Cloud","Focus", "010101", "111000", "Secure", "API", "Deep Learning", "NLP", "Data", "Processing", "Analyze"];
+            const cont=document.getElementById("floating-words");
+            const colors = ["text-cyan-500/30", "text-indigo-500/30"];
+
+            for(let i=0;i<50;i++){ // Increased from 25 to 50
+              const w=document.createElement("div");
+              // Assign class and a random color
+              w.className="word " + colors[Math.floor(Math.random() * colors.length)];
+              w.textContent=words[Math.floor(Math.random()*words.length)];
+              
+              // Random starting horizontal position
+              w.style.left=Math.random()*100+"vw";
+              // Random font size
+              w.style.fontSize= (0.8+Math.random()*1.2)+"rem";
+
+              // Random animation duration
+              w.style.animationDuration= (15+Math.random()*10)+"s";
+              // Random animation delay (negative to start part-way through)
+              w.style.animationDelay = -(Math.random() * 25) + "s";
+
+              // Set CSS variables for random horizontal drift in the animation
+              w.style.setProperty('--x-start', (Math.random() * 10 - 5) + "vw");
+              w.style.setProperty('--x-mid', (Math.random() * 20 - 10) + "vw");
+              w.style.setProperty('--x-end', (Math.random() * 10 - 5) + "vw");
+
+              cont.appendChild(w);
+            }
+        });
+    </script>
+
+</body>
+</html>
