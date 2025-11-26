@@ -1,9 +1,9 @@
 from flask import Flask, request, send_from_directory, jsonify, redirect
 from werkzeug.utils import secure_filename
 import os
-import traceback
+import traceback  # <-- ADD THIS IMPORT
 import json
-import logging
+import logging      # <-- ADD THIS IMPORT
 from gemini_transcriber import transcribe_audio
 from gemini_notes_generator import generate_structured_notes
 from google import genai
@@ -100,7 +100,10 @@ def handle_transcription():
                 return jsonify({"error": "Failed to save audio file to disk."}), 500
 
         except Exception as e:
-            return jsonify({"error": f"Failed to save file locally: {e}"}), 500
+            # 🔴 ADDED LOGGING
+            error_details = traceback.format_exc()
+            logging.error(f"Failed to save file locally: {e}\n{error_details}")
+            return jsonify({"error": f"Failed to save file locally: {e}", "details": error_details}), 500
 
         # --- 🧩 Handle optional prompts and templates ---
         # **MODIFIED: Separate prompt and template**
@@ -112,6 +115,8 @@ def handle_transcription():
             transcript = transcribe_audio(audio_path)
 
             if transcript.startswith("ERROR:"):
+                # 🔴 ADDED LOGGING
+                logging.error(f"Transcription returned a handled ERROR: {transcript}")
                 print(f"Transcription returned ERROR: {transcript}")
                 lower = transcript.lower()
                 os.remove(audio_path)
@@ -120,10 +125,15 @@ def handle_transcription():
                 return jsonify({"error": transcript}), 500
 
         except Exception as e:
+            # 🔴 THIS IS THE CRITICAL FIX: Log the full unhandled error
+            error_details = traceback.format_exc()
+            logging.error(f"Unhandled error during transcription: {e}\n{error_details}")
+            
             transcript = f"(Unhandled error during transcription: {e})"
             if os.path.exists(audio_path):
                 os.remove(audio_path)
-            return jsonify({"error": transcript}), 500
+            # Also return the details in the JSON response for easier debugging
+            return jsonify({"error": transcript, "details": error_details}), 500
 
         # 3. Generate structured notes (and save DOCX/PDF)
         try:
@@ -148,9 +158,12 @@ def handle_transcription():
             }), 200
 
         except Exception as e:
+            # 🔴 ADDED LOGGING
+            error_details = traceback.format_exc()
+            logging.error(f"Note generation failed: {e}\n{error_details}")
             if os.path.exists(audio_path):
                 os.remove(audio_path)
-            return jsonify({"error": f"Note generation failed: {e}"}), 500
+            return jsonify({"error": f"Note generation failed: {e}", "details": error_details}), 500
             
     return jsonify({"error": "File type not allowed or other internal file error"}), 400
 
@@ -219,7 +232,10 @@ def handle_ai_chat():
         return jsonify({"response": response.text}), 200
 
     except Exception as e:
-        return jsonify({"response": f"An unexpected error occurred with the AI chat: {e}"}), 500
+        # 🔴 ADDED LOGGING
+        error_details = traceback.format_exc()
+        logging.error(f"An unexpected error occurred with the AI chat: {e}\n{error_details}")
+        return jsonify({"response": f"An unexpected error occurred with the AI chat: {e}", "details": error_details}), 500
 
 
 @app.route('/download/<filename>', methods=['GET'])
